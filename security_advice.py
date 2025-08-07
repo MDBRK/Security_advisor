@@ -4,44 +4,66 @@ import re
 
 # --- Nmap Port Advice ---
 port_advice = {
-    "21": "FTP – Check for anonymous login or brute-force with Hydra.",
-    "22": "SSH – Brute-force with Hydra, check for weak keys.",
-    "23": "Telnet – Insecure; try default creds.",
-    "25": "SMTP – Check for open relay or user enum.",
-    "53": "DNS – Try zone transfer: dig axfr @<ip>.",
-    "69": "TFTP – Download config files.",
-    "80": "HTTP – Run Nikto, WhatWeb, Gobuster.",
-    "88": "Kerberos – Try AS-REP or Kerberoasting (AD).",
-    "110": "POP3 – Test for plaintext auth.",
-    "111": "RPC – Look for NFS.",
-    "135": "MSRPC – Windows, check DCOM/DCERPC vulns.",
-    "137": "NetBIOS – Use enum4linux or nbtstat.",
-    "139": "SMB – Check for EternalBlue or file shares.",
-    "143": "IMAP – Brute-force or SSL test.",
-    "161": "SNMP – Try snmpwalk with 'public'.",
-    "389": "LDAP – Enumerate users/groups.",
-    "445": "SMB – Try smbclient, crackmapexec, enum4linux.",
-    "512": "exec – Check for RCE.",
-    "513": "login – Test R-services.",
-    "514": "shell – Insecure remote shell.",
-    "873": "rsync – Anonymous file access?",
-    "1433": "MSSQL – Try default creds, metasploit.",
-    "2049": "NFS – showmount -e <ip>",
-    "2082": "cPanel – Brute-force admin panel.",
-    "2083": "cPanel SSL – Same.",
-    "3268": "GC LDAP – Multi-domain AD.",
-    "3269": "GC LDAPS – Same over SSL.",
-    "3389": "RDP – Ncrack, check BlueKeep.",
-    "4455": "NTLM – Relay attacks possible.",
-    "5432": "PostgreSQL – Test creds.",
-    "5900": "VNC – No password?",
-    "5985": "WinRM – Use evil-winrm if creds.",
-    "6379": "Redis – May allow RCE.",
-    "8000": "Alt HTTP – Gobuster, Nikto.",
-    "8080": "Alt HTTP – Same.",
-    "8443": "HTTPS – Test SSL/TLS ciphers.",
-    "9200": "Elasticsearch – Test unauth access.",
-    "11211": "Memcached – Test for abuse.",
+    "20": "FTP Data – Same as FTP (port 21), check data transfer vulnerabilities.",
+    "21": "FTP – Check anonymous login, brute-force with Hydra, directory traversal.",
+    "22": "SSH – Brute-force Hydra/Ncrack, weak keys, outdated versions.",
+    "23": "Telnet – Try default creds, sniff clear-text traffic.",
+    "25": "SMTP – Open relay check, user enumeration (smtp-user-enum).",
+    "53": "DNS – Zone transfer (dig axfr), DNS spoof/version leaks.",
+    "67": "DHCP – Rogue servers/spoofing detection.",
+    "69": "TFTP – Download configs, anonymous access.",
+    "80": "HTTP – Nikto, WhatWeb, Gobuster for directories and panels.",
+    "88": "Kerberos – AS-REP roasting, Kerberoasting in AD.",
+    "110": "POP3 – Brute-force, plaintext creds.",
+    "111": "RPC – Enumerate NFS shares.",
+    "123": "NTP – Monlist amplification, version leaks.",
+    "135": "MSRPC – DCOM/DCERPC vulns.",
+    "137": "NetBIOS – enum4linux, nbtstat info gathering.",
+    "139": "SMB – EternalBlue, Null sessions, share enumeration.",
+    "143": "IMAP – Brute-force, SSL cert inspection.",
+    "161": "SNMP – snmpwalk, brute-force community strings.",
+    "389": "LDAP – User/group enumeration, referral abuse.",
+    "443": "HTTPS – Test SSL/TLS ciphers, cert validity, vulnerabilities.",
+    "445": "SMB – crackmapexec, enum4linux, pass-the-hash.",
+    "512": "exec – RCE testing.",
+    "513": "login – R-services auth testing.",
+    "514": "shell – Insecure remote shell check.",
+    "543": "Klogin – Test r-commands for weak auth.",
+    "544": "Kshell – Same as 543.",
+    "548": "AFP – Check for unauth access (Apple Filing Protocol).",
+    "5900": "VNC – Check for no or weak password.",
+    "593": "HTTP RPC – MSRPC over HTTP, test for vulnerabilities.",
+    "631": "IPP – Printer exploitation, CUPS vulnerability scans.",
+    "636": "LDAPS – Encrypted LDAP, user enumeration.",
+    "989": "FTPS (data) – Check SSL/TLS implementation.",
+    "990": "FTPS (control) – Same as 989.",
+    "1080": "SOCKS Proxy – Abuse open proxy for pivoting.",
+    "1194": "OpenVPN – Check for misconfigurations.",
+    "1433": "MSSQL – Brute-force, xp_cmdshell exploit.",
+    "1521": "Oracle DB – Default creds, SQL injection.",
+    "1723": "PPTP VPN – Vulnerable to MS-CHAPv2 attacks.",
+    "2049": "NFS – showmount -e, writable shares.",
+    "2082": "cPanel – Brute-force admin login.",
+    "2083": "cPanel SSL – Same as 2082 but encrypted.",
+    "3128": "Squid Proxy – Open proxy abuse.",
+    "3306": "MySQL – Test default creds, SQL injection.",
+    "3389": "RDP – Brute-force Ncrack, BlueKeep exploit.",
+    "3690": "SVN – Check for anonymous checkout.",
+    "4369": "Erlang Port Mapper – Service enumeration.",
+    "4444": "Metasploit Payload – Check listener activity.",
+    "5000": "UPnP – Exploit misconfigured services.",
+    "5432": "PostgreSQL – Brute-force, SQL injection.",
+    "5900": "VNC – No password check.",
+    "5985": "WinRM – Use evil-winrm with creds.",
+    "6379": "Redis – Unauthorized access, RCE.",
+    "8080": "HTTP Alternate – Directory busting, vuln scans.",
+    "8443": "HTTPS Alternate – Same as 443.",
+    "8888": "Alternate HTTP – Same as 8080.",
+    "9200": "Elasticsearch – Unauth access, data leaks, RCE.",
+    "11211": "Memcached – Amplification attacks, abuse.",
+    "27017": "MongoDB – No auth access, data dump.",
+    "50070": "HDFS Namenode – Information disclosure.",
+    "5901": "VNC (alternate) – Same checks as 5900.",
 }
 
 # --- Nikto Pattern Advice ---
@@ -103,24 +125,30 @@ dns_patterns = {
 # --- Parsers ---
 
 def parse_nmap(file):
+    print("\n🧲 Analyzing Nmap output...")
     with open(file, "r") as f:
-        for line in f:
-            if "Ports:" in line:
-                ip = re.search(r"Host: ([\d\.]+)", line)
-                ports = re.findall(r"(\d+)/open", line)
-                if ip:
-                    print(f"\n🔍 Target: {ip.group(1)}")
-                    for port in ports:
-                        advice = port_advice.get(port, f"Port {port} open – No specific advice.")
-                        print(f"  - {advice}")
+        content = f.read()
+        reports = re.split(r"Nmap scan report for ", content)[1:]
+        for report in reports:
+            lines = report.strip().split("\n")
+            ip = lines[0].strip()
+            print(f"\n🔍 Target: {ip}")
+            for line in lines:
+                match = re.match(r"(\d+)/tcp\s+open", line)
+                if match:
+                    port = match.group(1)
+                    advice = port_advice.get(port, f"Port {port} open – No specific advice.")
+                    print(f"  - {advice}")
 
 def parse_nikto(file):
     print("\n🧪 Analyzing Nikto output...")
+    seen = set()
     with open(file, "r") as f:
         for line in f:
             for pattern, advice in nikto_patterns.items():
-                if pattern.lower() in line.lower():
+                if pattern.lower() in line.lower() and pattern not in seen:
                     print(f"  - Found: {pattern} → {advice}")
+                    seen.add(pattern)
 
 def parse_sqlmap(file):
     print("\n🎯 Analyzing SQLMap output...")
@@ -142,12 +170,15 @@ def parse_dns(file):
     print("\n🧩 Analyzing dig/nslookup output...")
     with open(file, "r") as f:
         content = f.read().lower()
+        found = False
         for pattern, advice in dns_patterns.items():
             if pattern in content:
                 print(f"  - Found: {pattern} → {advice}")
+                found = True
+        if not found:
+            print("  - No actionable DNS information found.")
 
 # --- Main ---
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scan output advisor")
     parser.add_argument("--tool", required=True, help="Tool used (nmap, nikto, sqlmap, whatweb, dig, nslookup)")
@@ -164,7 +195,9 @@ if __name__ == "__main__":
         parse_sqlmap(args.file)
     elif tool == "whatweb":
         parse_whatweb(args.file)
-    elif tool == "dig" or tool == "nslookup":
+    elif tool in ["dig", "nslookup"]:
         parse_dns(args.file)
     else:
-        print("❌ Tool not supported. Use: nmap, nikto, sqlmap, whatweb, dig, nslookup.")
+        print("❌ Tool not supported. Use: nmap, nikto, sqlmap, whatweb, dig, nslookup")
+
+                        
